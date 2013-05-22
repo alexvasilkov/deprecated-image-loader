@@ -99,6 +99,14 @@ public class ImagesLoader extends ResourcesLoader<Bitmap> {
         loadImage(view, null, uri, NO_IMAGE_RES_ID, false, false);
     }
 
+    /**
+     * Loads image into given <code>view</code>.
+     * Shows <code>progressView</code> instead of <code>view</code> while loading.
+     */
+    public void loadImage(ImageView view, View progressView, String uri) {
+        loadImage(view, progressView, uri, NO_IMAGE_RES_ID, false, false);
+    }
+
 	/**
 	 * Loads image into given <code>view</code>.
 	 */
@@ -106,20 +114,20 @@ public class ImagesLoader extends ResourcesLoader<Bitmap> {
 		loadImage(view, null, uri, NO_IMAGE_RES_ID, useDelay, useAnimation);
 	}
 
+    /**
+     * Loads image into given <code>view</code>.<br/>
+     * Shows <code>progressView</code> instead of <code>view</code> while loading.
+     */
+    public void loadImage(ImageView view, View progressView, String uri, boolean useDelay, boolean useAnimation) {
+        loadImage(view, progressView, uri, NO_IMAGE_RES_ID, false, useAnimation);
+    }
+
 	/**
 	 * Loads image into given <code>view</code>.<br/>
 	 * Shows drawable with id <code>emptyImageRes</code> while loading the image and if no image is loaded.
 	 */
 	public void loadImage(ImageView view, String uri, int emptyImageRes, boolean useDelay, boolean useAnimation) {
 		loadImage(view, null, uri, emptyImageRes, useDelay, useAnimation);
-	}
-
-	/**
-	 * Loads image into given <code>view</code>.<br/>
-	 * Shows <code>progressView</code> instead of <code>view</code> while loading.
-	 */
-	public void loadImage(ImageView view, View progressView, String uri, boolean useDelay, boolean useAnimation) {
-		loadImage(view, progressView, uri, NO_IMAGE_RES_ID, false, useAnimation);
 	}
 
 	/**
