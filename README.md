@@ -35,10 +35,10 @@ Available methods:
 
 Methods summary:
 
-> Loads image from 'uri' into given 'view'.  
-> Shows 'progressView' instead of 'view' while loading (if 'progressView' is not null).  
-> Uses 'emptyImageRes' (if not equals to NO_IMAGE_RES_ID) as image placeholder while loading.  
-> Optionally you can apply small delay before starting loading image (sometimes usefull for ListView images) and a fade-in animation when image is loaded into the given 'view'.
+> Loads image from `uri` into given `view`.  
+> Shows `progressView` instead of `view` while loading (if `progressView` is not null).  
+> Uses `emptyImageRes` (if not equals to NO_IMAGE_RES_ID) as image placeholder while loading.  
+> Optionally you can apply small delay before starting loading image (sometimes usefull for ListView images) and a fade-in animation when image is loaded into the given `view`.
 
 Also you can fine tune loading by using this method:
 
@@ -72,3 +72,20 @@ Uri parameter can have following schemes:
 * content:// (for images from content providers, i.e. contacts)
 * android.resource:// (i.e. "android.resource://" + context.getPackageName() + '/' + R.raw.image)
 
+#### How to build ####
+
+You need [Maven](http://maven.apache.org/) to build the project. Just run `mvn clean install` from project's root, jar file will be generated into `target` folder.
+
+#### License ####
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
