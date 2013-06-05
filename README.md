@@ -15,7 +15,7 @@ First of all you should initialize ImageLoader instance inside your Application 
         }
     }
 
-And now you can start using it everywere you want:
+And now you can start using it everywhere you want:
 
     ImagesLoader.get().loadImage(imageView, imageProgressView, url, true);
 

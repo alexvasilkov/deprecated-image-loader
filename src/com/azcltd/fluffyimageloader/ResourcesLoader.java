@@ -28,7 +28,7 @@ public abstract class ResourcesLoader<T> {
     protected static final String TAG = "ResourcesLoader";
 
     private static final int MAX_EXTERNAL_CACHE_SIZE = 100 * 1024 * 1024;
-    private static final int MAX_INTERNAL_CACHE_SIZE = 1 * 1024 * 1024;
+    private static final int MAX_INTERNAL_CACHE_SIZE = 30 * 1024 * 1024;
     private static final int DOWNLOAD_THREAD_POOL_SIZE = 4;
     private static final int LOCAL_LOADER_THREAD_POOL_SIZE = 2;
 
