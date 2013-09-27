@@ -1,6 +1,7 @@
 package com.azcltd.fluffyimageloader;
 
 import java.util.Collection;
+import java.util.Map;
 
 public abstract class ResourceSpecs<T> {
 
@@ -10,6 +11,8 @@ public abstract class ResourceSpecs<T> {
     private long mDelay;
 
     private OnResourceLoadingListener<T> mOnLoadingListener;
+
+    private Map<String, String> mHeaders;
 
     public ResourceSpecs(String uri) {
         setUri(uri);
@@ -57,6 +60,14 @@ public abstract class ResourceSpecs<T> {
 
     public void setOnResourceLoadingListener(OnResourceLoadingListener<T> listener) {
         mOnLoadingListener = listener;
+    }
+
+    public Map<String, String> getHeaders() {
+    	return mHeaders;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        mHeaders = headers;
     }
 
     /**

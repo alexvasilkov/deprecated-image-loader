@@ -1,17 +1,5 @@
 package com.azcltd.fluffyimageloader;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,6 +7,20 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import com.azcltd.fluffyimageloader.ResourcesLoadingManager.LoadingState;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.azcltd.fluffyimageloader.ResourcesLoadingManager.LoadingState;
 
@@ -272,7 +274,28 @@ public abstract class ResourcesLoader<T> {
                     // TODO: add progress
 
                     try {
-                        HttpResponse resp = mHttpClient.execute(new HttpGet(uri));
+			HttpGet request = new HttpGet(uri);
+
+                        Set<ResourceSpecs<T>> specsList = mLoadingManager.getSpecsList(uri);
+                        if (specsList != null) {
+                            // Getting last added specs from set for given URI
+                            ResourceSpecs<T> lastSpecs = null;
+                            Iterator<ResourceSpecs<T>> iterator = specsList.iterator();
+                            while (iterator.hasNext()) lastSpecs = iterator.next();
+
+                            if (lastSpecs != null) {
+                                Map<String,String> headers = lastSpecs.getHeaders();
+                                if (headers != null) {
+                                    // Adding headers to request
+                                    for (String headerName : headers.keySet()) {
+                                        request.addHeader(headerName, headers.get(headerName));
+                                    }
+                                }
+                            }
+                        }
+
+                        HttpResponse resp = mHttpClient.execute(request);
+
                         int statusCode = resp.getStatusLine().getStatusCode();
                         boolean isOk = statusCode / 100 == 2;
                         HttpEntity entity = resp == null ? null : resp.getEntity();
