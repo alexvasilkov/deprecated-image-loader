@@ -12,17 +12,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.azcltd.fluffyimageloader.ResourcesLoadingManager.LoadingState;
 
 public abstract class ResourcesLoader<T> {
 
@@ -104,8 +102,7 @@ public abstract class ResourcesLoader<T> {
     protected abstract void putToMemoryCache(String uri, T res);
 
     /**
-     * @param in
-     *            InputStream from which resource should be loaded. Should be closed inside this method! May be null.
+     * @param in InputStream from which resource should be loaded. Should be closed inside this method! May be null.
      * @return Will be called from background thread to get resource object.
      */
     protected abstract T loadFromStream(InputStream in, Collection<ResourceSpecs<T>> specsList);
@@ -187,6 +184,20 @@ public abstract class ResourcesLoader<T> {
         mLocalLoaderThreadPool.submit(new LocalLoaderTask(uri, cachedFileUri));
     }
 
+    private void fillHttpHeaders(HttpUriRequest request, String uri) {
+        Set<ResourceSpecs<T>> specsList = mLoadingManager.getSpecsList(uri);
+        if (specsList == null) return;
+
+        // Getting first specs from set for given URI
+        ResourceSpecs<T> lastSpecs = specsList.size() == 0 ? null : specsList.iterator().next();
+        if (lastSpecs == null || lastSpecs.getHeaders() == null) return;
+
+        // Adding headers to request
+        for (Map.Entry<String, String> pair : lastSpecs.getHeaders().entrySet()) {
+            request.addHeader(pair.getKey(), pair.getValue());
+        }
+    }
+
     private class ManagerTask extends FailSafeRunnable {
         @Override
         protected void runSafe() {
@@ -222,10 +233,12 @@ public abstract class ResourcesLoader<T> {
                             if (isVerbose()) Log.d(TAG, "2. Resource is found in memory cache: " + uri);
                             notifyLoaded(uri, res, true, false);
                         } else if (mDiskCache.isExists(uri)) {
-                            if (isVerbose()) Log.d(TAG, "2. Resource is found in disk cache, scheduling loader: " + uri);
+                            if (isVerbose())
+                                Log.d(TAG, "2. Resource is found in disk cache, scheduling loader: " + uri);
                             scheduleLocalLoader(uri, mDiskCache.get(uri));
                         } else if (uriHelper.isLocal()) {
-                            if (isVerbose()) Log.d(TAG, "2. No resources found in cache, scheduling local loader: " + uri);
+                            if (isVerbose())
+                                Log.d(TAG, "2. No resources found in cache, scheduling local loader: " + uri);
                             scheduleLocalLoader(uri, null);
                         } else if (uriHelper.isRemote()) {
                             if (isVerbose()) Log.d(TAG, "2. No resources found in cache, scheduling download: " + uri);
@@ -235,10 +248,12 @@ public abstract class ResourcesLoader<T> {
                             notifyLoaded(uri, null, true, false);
                         }
                     } else {
-                        if (isVerbose()) Log.d(TAG, "2. Resource was outdated and will not be loaded (manager thread): " + uri);
+                        if (isVerbose())
+                            Log.d(TAG, "2. Resource was outdated and will not be loaded (manager thread): " + uri);
                     }
                 }
             } catch (InterruptedException e) {
+                // Thread will be closed
             }
             mManagerThread = null;
         }
@@ -261,7 +276,8 @@ public abstract class ResourcesLoader<T> {
             if (!mLoadingManager.isOutdated(uri)) {
                 T res = getFromMemoryCache(uri);
                 if (res != null) {
-                    if (isVerbose()) Log.w(TAG, "3. Resource was found in memory cache - no downloading is needed: " + uri);
+                    if (isVerbose())
+                        Log.w(TAG, "3. Resource was found in memory cache - no downloading is needed: " + uri);
                     notifyLoaded(uri, res, true, false);
                 } else if (mDiskCache.isExists(uri)) {
                     if (isVerbose()) Log.w(TAG, "3. Resource was found on disk - no downloading is needed: " + uri);
@@ -274,31 +290,13 @@ public abstract class ResourcesLoader<T> {
                     // TODO: add progress
 
                     try {
-			HttpGet request = new HttpGet(uri);
-
-                        Set<ResourceSpecs<T>> specsList = mLoadingManager.getSpecsList(uri);
-                        if (specsList != null) {
-                            // Getting last added specs from set for given URI
-                            ResourceSpecs<T> lastSpecs = null;
-                            Iterator<ResourceSpecs<T>> iterator = specsList.iterator();
-                            while (iterator.hasNext()) lastSpecs = iterator.next();
-
-                            if (lastSpecs != null) {
-                                Map<String,String> headers = lastSpecs.getHeaders();
-                                if (headers != null) {
-                                    // Adding headers to request
-                                    for (String headerName : headers.keySet()) {
-                                        request.addHeader(headerName, headers.get(headerName));
-                                    }
-                                }
-                            }
-                        }
-
+                        HttpGet request = new HttpGet(uri);
+                        fillHttpHeaders(request, uri);
                         HttpResponse resp = mHttpClient.execute(request);
 
                         int statusCode = resp.getStatusLine().getStatusCode();
                         boolean isOk = statusCode / 100 == 2;
-                        HttpEntity entity = resp == null ? null : resp.getEntity();
+                        HttpEntity entity = resp.getEntity();
 
                         if (isOk) {
                             InputStream in = entity == null ? null : entity.getContent();
@@ -306,13 +304,15 @@ public abstract class ResourcesLoader<T> {
                             if (isVerbose())
                                 Log.d(TAG, "3. Resource downloading is " + (res == null ? "failed" : "succeeded") + ": " + uri);
                         } else {
-                            if (isVerbose()) Log.d(TAG, "3. Resource downloading is failed, http status code " + statusCode + ": " + uri);
+                            if (isVerbose())
+                                Log.d(TAG, "3. Resource downloading is failed, http status code " + statusCode + ": " + uri);
                         }
 
                         if (entity != null) entity.consumeContent();
 
                     } catch (Exception e) {
-                        if (isVerbose()) Log.d(TAG, "3. Exception while downloading resource: " + e.getMessage() + " (" + uri + ")");
+                        if (isVerbose())
+                            Log.d(TAG, "3. Exception while downloading resource: " + e.getMessage() + " (" + uri + ")");
                     }
 
                     notifyLoaded(uri, res, false, false);
@@ -364,7 +364,8 @@ public abstract class ResourcesLoader<T> {
                     notifyLoaded(uri, res, false, true);
                 }
 
-                if (isVerbose()) Log.d(TAG, "4. Resource loading is " + (res == null ? "failed" : "succeeded") + ": " + uri);
+                if (isVerbose())
+                    Log.d(TAG, "4. Resource loading is " + (res == null ? "failed" : "succeeded") + ": " + uri);
             } else {
                 if (isVerbose()) Log.d(TAG, "4. Resource was outdated before loading: " + uri);
             }
