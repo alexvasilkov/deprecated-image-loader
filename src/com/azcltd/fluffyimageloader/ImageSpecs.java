@@ -1,13 +1,14 @@
 package com.azcltd.fluffyimageloader;
 
-import java.lang.ref.WeakReference;
-import java.util.Collection;
-
 import android.graphics.Bitmap;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import com.azcltd.fluffyimageloader.loader.ResourceSpecs;
+
+import java.lang.ref.WeakReference;
+import java.util.Collection;
 
 public class ImageSpecs extends ResourceSpecs<Bitmap> {
 
@@ -25,9 +26,11 @@ public class ImageSpecs extends ResourceSpecs<Bitmap> {
     }
 
     /**
+     * Preferred way of getting ImageSpecs object.<br/>
+     * Should be used within ListViews.<br/>
      * This method will try to find existing specs associated with given ImageView. If no specs found new one will be created.
      */
-    private static ImageSpecs findOrCreateImageSpecs(ImageView imageView, String uri) {
+    public static ImageSpecs getImageSpecsFromView(ImageView imageView, String uri) {
         ImageSpecs specs = (ImageSpecs) imageView.getTag(TAG_IMAGE_SPECS_OBJECT);
         if (specs == null) {
             specs = new ImageSpecs(uri);
@@ -35,15 +38,8 @@ public class ImageSpecs extends ResourceSpecs<Bitmap> {
         } else {
             specs.setUri(uri);
         }
+        specs.setImageView(imageView);
         return specs;
-    }
-
-    /**
-     * Preferred way of getting ImageSpecs object.<br/>
-     * Should be used within ListViews.
-     */
-    public static ImageSpecs getImageSpecsFromView(ImageView imageView, String uri) {
-        return findOrCreateImageSpecs(imageView, uri);
     }
 
     public static ImageSpecs getImageSpecs(String uri) {

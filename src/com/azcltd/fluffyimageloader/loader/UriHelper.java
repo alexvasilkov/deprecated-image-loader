@@ -1,4 +1,4 @@
-package com.azcltd.fluffyimageloader;
+package com.azcltd.fluffyimageloader.loader;
 
 import android.content.ContentResolver;
 import android.net.Uri;

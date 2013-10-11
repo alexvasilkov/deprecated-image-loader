@@ -1,19 +1,17 @@
-package com.azcltd.fluffyimageloader;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Comparator;
+package com.azcltd.fluffyimageloader.cache;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 
-public class DiskUtils {
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+
+class DiskUtils {
 
     private static final String DIR_EXTERNAL_CACHE = "Android/data/%s/cache";
     private static final String DIR_INTERNAL_CACHE = "/cache";
@@ -45,9 +43,9 @@ public class DiskUtils {
         return sIsUsingInternalCache;
     }
 
-    public static File getCacheFileForUri(Context context, String uri) throws FileNotFoundException {
-        if (uri == null) throw new FileNotFoundException("Uri for file is null");
-        return new File(getCacheDir(context), getFileNameFromUri(uri));
+    public static File getCacheFileForName(Context context, String name) throws FileNotFoundException {
+        if (name == null) throw new FileNotFoundException("Name is null");
+        return new File(getCacheDir(context), name);
     }
 
     /**
@@ -102,20 +100,6 @@ public class DiskUtils {
             }
 
             if (!found) return new File(dir, fileName);
-        }
-    }
-
-    /**
-     * @return Name of file from given Uri. May be null
-     */
-    public static String getFileNameFromUri(String uri) {
-        if (uri == null) return null;
-        try {
-            String lastPart = uri.substring(uri.lastIndexOf("/") + 1);
-            String name = uri.hashCode() + '-' + URLEncoder.encode(lastPart, "UTF-8");
-            return name.replace('%', '_'); // To use in Uri (avoid encoding)
-        } catch (UnsupportedEncodingException e) {
-            return null;
         }
     }
 

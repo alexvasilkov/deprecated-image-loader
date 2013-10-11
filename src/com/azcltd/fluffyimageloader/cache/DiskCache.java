@@ -1,15 +1,10 @@
-package com.azcltd.fluffyimageloader;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+package com.azcltd.fluffyimageloader.cache;
 
 import android.content.Context;
 
-public class DiskUriCache {
+import java.io.*;
+
+public class DiskCache {
 
     private static final int BUFFER_SIZE = 2048;
 
@@ -17,7 +12,7 @@ public class DiskUriCache {
     private int mMaxExternalDiskUsage;
     private int mMaxInternalDiskUsage;
 
-    public DiskUriCache(Context appContext, int maxExternalCacheSize, int maxInternalCacheSize) {
+    public DiskCache(Context appContext, int maxExternalCacheSize, int maxInternalCacheSize) {
         mAppContext = appContext;
         mMaxExternalDiskUsage = maxExternalCacheSize;
         mMaxInternalDiskUsage = maxInternalCacheSize;
@@ -26,18 +21,18 @@ public class DiskUriCache {
     }
 
     /**
-     * @param uri
-     *            Source Uri of resource
+     * @param key
+     *            Resource key
      * @param in
      *            InputStream to save on disk. Will be closed at the end.
      */
-    public boolean save(String uri, InputStream in) {
+    public boolean save(String key, InputStream in) {
         if (in == null) return false;
 
         OutputStream out = null;
         File file = null;
         try {
-            file = DiskUtils.getCacheFileForUri(mAppContext, uri);
+            file = DiskUtils.getCacheFileForName(mAppContext, key);
             file.getParentFile().mkdirs();
             out = new FileOutputStream(file);
             // Copying in to out
@@ -63,27 +58,28 @@ public class DiskUriCache {
         return file.exists(); // may be cleaned while keepDirWithinSize
     }
 
-    public void delete(String uri) {
+    public void delete(String key) {
         try {
-            DiskUtils.getCacheFileForUri(mAppContext, uri).delete();
+            DiskUtils.getCacheFileForName(mAppContext, key).delete();
         } catch (FileNotFoundException e) {
+            // Not in the cache
         }
     }
 
-    public boolean isExists(String uri) {
-        return getPath(uri) != null;
+    public boolean isExists(String key) {
+        return getPath(key) != null;
     }
 
     /**
-     * @return Uri of the cached file
+     * @return Path for cached file
      */
-    public String get(String uri) {
-        return DiskUtils.toUri(getPath(uri));
+    public String get(String key) {
+        return DiskUtils.toUri(getPath(key));
     }
 
-    public String getPath(String uri) {
+    private String getPath(String key) {
         try {
-            File file = DiskUtils.getCacheFileForUri(mAppContext, uri);
+            File file = DiskUtils.getCacheFileForName(mAppContext, key);
             return file.exists() ? file.getAbsolutePath() : null;
         } catch (FileNotFoundException e) {
             return null;

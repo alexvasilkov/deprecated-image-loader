@@ -1,4 +1,4 @@
-package com.azcltd.fluffyimageloader;
+package com.azcltd.fluffyimageloader.loader;
 
 import java.util.Collection;
 import java.util.Map;
@@ -86,7 +86,7 @@ public abstract class ResourceSpecs<T> {
 
     /**
      * Called when resource is loaded (from Internet or from cache).
-     * 
+     *
      * @param res
      *            Loaded resource or {@code null} if some error is occurred.
      */

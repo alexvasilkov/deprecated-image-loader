@@ -1,17 +1,6 @@
-package com.azcltd.fluffyimageloader;
+package com.azcltd.fluffyimageloader.loader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.*;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
@@ -27,7 +16,11 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HttpContext;
 
-public class ConcurrentHttpClient extends DefaultHttpClient {
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
+
+class ConcurrentHttpClient extends DefaultHttpClient {
 
     private static final int DEFAULT_TIMEOUT = 20000;
     private static final String ACCEPT_ENCODING = "Accept-Encoding";

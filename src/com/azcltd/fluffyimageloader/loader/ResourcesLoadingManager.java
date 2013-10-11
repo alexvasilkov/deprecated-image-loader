@@ -1,11 +1,6 @@
-package com.azcltd.fluffyimageloader;
+package com.azcltd.fluffyimageloader.loader;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class helps synchronize and manage resources' Uris queue. <br/>
@@ -15,7 +10,7 @@ import java.util.Set;
  * <br/>
  * Also each Uri can be in several loading states (see {@code LoadingState} enum).
  */
-public class ResourcesLoadingManager<T> {
+class ResourcesLoadingManager<T> {
 
     private Map<String, Set<ResourceSpecs<T>>> mMap = new LinkedHashMap<String, Set<ResourceSpecs<T>>>();
     private Map<String, LoadingState> mStateMap = new LinkedHashMap<String, LoadingState>();
@@ -53,7 +48,7 @@ public class ResourcesLoadingManager<T> {
      * @return Snapshot (copy) set of specs objects currently waiting for given Uri to be loaded.<br/>
      *         May return {@code null} if given Uri is no more in the loading queue. I.e. given Uri was already loaded and all waiting specs
      *         are already notified. Or if there are no more valid (not outdated) specs objects for given Uri.
-     * @see isOutdated() method
+     * @see {@link #isOutdated(String)} method
      */
     public synchronized Set<ResourceSpecs<T>> getSpecsList(String uri) {
         return mMap.containsKey(uri) ? new HashSet<ResourceSpecs<T>>(mMap.get(uri)) : null;
@@ -65,7 +60,7 @@ public class ResourcesLoadingManager<T> {
      * <br/>
      * This approach is designed for loading images into ListView or similar views where if items were scrolled very fast we should avoid
      * loading "outdated" and show them in wrong positions in list.
-     * 
+     *
      * @param uri
      * @return True if all corresponding specs objects for given {@code uri} were outdated. False otherwise.
      */
@@ -104,7 +99,7 @@ public class ResourcesLoadingManager<T> {
 
     /**
      * Removes given Uri from queue and returns all corresponding sepcs objects.
-     * 
+     *
      * @return May return {@code null} if specified {@code uri} was already deleted from queue (i.e. all specs were outdated)
      */
     public synchronized Set<ResourceSpecs<T>> remove(String uri) {
@@ -117,7 +112,7 @@ public class ResourcesLoadingManager<T> {
     /**
      * Setting current loading state for Uri.<br/>
      * Do nothing if given Uri is not in queue.
-     * 
+     *
      * @see LoadingState
      */
     public synchronized void setState(String uri, LoadingState state) {
@@ -126,7 +121,7 @@ public class ResourcesLoadingManager<T> {
 
     /**
      * Getting current loading state for Uri.
-     * 
+     *
      * @return Loading state. May return {@code null} if given Uri was already removed from loading queue.
      * @see LoadingState
      */
@@ -136,9 +131,9 @@ public class ResourcesLoadingManager<T> {
 
     /**
      * Finds and returns first Uri waiting to be managed.
-     * 
+     *
      * @return First Uri to process. May return {@code null} if no Uris are waiting to be managed.
-     * @see LoadingState.WAIT_MANAGING
+     * @see {@literal LoadingState.WAIT_MANAGING}
      */
     public synchronized String getNextUriToManage(boolean skipDelayCheck) {
         for (String uri : mStateMap.keySet()) {

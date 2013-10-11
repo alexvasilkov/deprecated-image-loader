@@ -1,8 +1,5 @@
 package com.azcltd.fluffyimageloader;
 
-import java.io.InputStream;
-import java.util.Collection;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +9,11 @@ import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import com.azcltd.fluffyimageloader.loader.ResourceSpecs;
+import com.azcltd.fluffyimageloader.loader.ResourcesLoader;
+
+import java.io.InputStream;
+import java.util.Collection;
 
 public class ImagesLoader extends ResourcesLoader<Bitmap> {
 
@@ -44,13 +46,13 @@ public class ImagesLoader extends ResourcesLoader<Bitmap> {
 	}
 
 	@Override
-	protected Bitmap getFromMemoryCache(String uri) {
-		return mMemoryCache.get(uri);
+	protected Bitmap getFromMemoryCache(String key) {
+		return mMemoryCache.get(key);
 	}
 
 	@Override
-	protected void putToMemoryCache(String uri, Bitmap image) {
-		mMemoryCache.put(uri, image);
+	protected void putToMemoryCache(String key, Bitmap image) {
+		mMemoryCache.put(key, image);
 	}
 
 	@Override
