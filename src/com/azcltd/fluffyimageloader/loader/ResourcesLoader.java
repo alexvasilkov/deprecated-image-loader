@@ -74,7 +74,11 @@ public abstract class ResourcesLoader<T> {
         mIsVerbose = verbose;
     }
 
-    private String toKey(String uri) {
+    public DiskCache getDiskCache() {
+        return mDiskCache;
+    }
+
+    public String toCacheKey(String uri) {
         return (mCacheKeyGenerator == null ? DEFAULT_CACHE_KEY_GENERATOR : mCacheKeyGenerator).toCacheKey(uri);
     }
 
@@ -92,7 +96,7 @@ public abstract class ResourcesLoader<T> {
             return;
         }
 
-        T res = getFromMemoryCache(toKey(uri));
+        T res = getFromMemoryCache(toCacheKey(uri));
         if (res != null) {
             if (isVerbose()) Log.d(TAG, "1. Resource is loaded from memory cache in same moment: " + uri);
             specs.onLoaded(res, true, false);
@@ -131,7 +135,7 @@ public abstract class ResourcesLoader<T> {
         Set<ResourceSpecs<T>> specsList = mLoadingManager.getSpecsList(uri);
         if (specsList == null) return null;
 
-        String key = toKey(uri);
+        String key = toCacheKey(uri);
         T res;
         if (!skipDiskCache && ResourceSpecs.isUseDiskCache(specsList)) {
             // Saving stream to cached file and then reading from this file
@@ -238,14 +242,14 @@ public abstract class ResourcesLoader<T> {
                     UriHelper uriHelper = new UriHelper(uri);
 
                     if (!mLoadingManager.isOutdated(uri)) {
-                        T res = getFromMemoryCache(toKey(uri));
+                        T res = getFromMemoryCache(toCacheKey(uri));
                         if (res != null) {
                             if (isVerbose()) Log.d(TAG, "2. Resource is found in memory cache: " + uri);
                             notifyLoaded(uri, res, true, false);
-                        } else if (mDiskCache.isExists(toKey(uri))) {
+                        } else if (mDiskCache.isExists(toCacheKey(uri))) {
                             if (isVerbose())
                                 Log.d(TAG, "2. Resource is found in disk cache, scheduling loader: " + uri);
-                            scheduleLocalLoader(uri, mDiskCache.get(toKey(uri)));
+                            scheduleLocalLoader(uri, mDiskCache.get(toCacheKey(uri)));
                         } else if (uriHelper.isLocal()) {
                             if (isVerbose())
                                 Log.d(TAG, "2. No resources found in cache, scheduling local loader: " + uri);
@@ -284,14 +288,14 @@ public abstract class ResourcesLoader<T> {
             if (uri == null) return;
 
             if (!mLoadingManager.isOutdated(uri)) {
-                T res = getFromMemoryCache(toKey(uri));
+                T res = getFromMemoryCache(toCacheKey(uri));
                 if (res != null) {
                     if (isVerbose())
                         Log.w(TAG, "3. Resource was found in memory cache - no downloading is needed: " + uri);
                     notifyLoaded(uri, res, true, false);
-                } else if (mDiskCache.isExists(toKey(uri))) {
+                } else if (mDiskCache.isExists(toCacheKey(uri))) {
                     if (isVerbose()) Log.w(TAG, "3. Resource was found on disk - no downloading is needed: " + uri);
-                    scheduleLocalLoader(uri, mDiskCache.get(toKey(uri)));
+                    scheduleLocalLoader(uri, mDiskCache.get(toCacheKey(uri)));
                 } else {
                     if (isVerbose()) Log.d(TAG, "3. Starting download process for resource: " + uri);
                     mLoadingManager.setState(uri, LoadingState.DOWNLOADING);
@@ -352,7 +356,7 @@ public abstract class ResourcesLoader<T> {
             if (uri == null) return;
 
             if (!mLoadingManager.isOutdated(uri)) {
-                T res = getFromMemoryCache(toKey(uri));
+                T res = getFromMemoryCache(toCacheKey(uri));
                 if (res != null) {
                     if (isVerbose()) Log.w(TAG, "4. Resource is found in memory cache: " + uri);
                     notifyLoaded(uri, res, true, false);

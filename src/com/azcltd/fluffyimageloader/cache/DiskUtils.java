@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-class DiskUtils {
+public class DiskUtils {
 
     private static final String DIR_EXTERNAL_CACHE = "Android/data/%s/cache";
     private static final String DIR_INTERNAL_CACHE = "/cache";
