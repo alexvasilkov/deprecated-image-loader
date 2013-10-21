@@ -1,6 +1,8 @@
 package com.azcltd.fluffyimageloader.loader;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -181,6 +183,11 @@ public abstract class ResourcesLoader<T> {
      * Checks if the device has Internet connection.
      */
     private boolean hasInternetConnection() {
+        int permissionCheck = mAppContext.getPackageManager().checkPermission(Manifest.permission.ACCESS_NETWORK_STATE,
+                mAppContext.getPackageName());
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) return true;
+
         ConnectivityManager cm = (ConnectivityManager) mAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo wifiNetwork = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
