@@ -9,7 +9,7 @@
 
     <groupId>com.alexvasilkov</groupId>
     <artifactId>fluffy-image-loader</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Fluffy ImageLoader</name>
@@ -20,7 +20,7 @@
         <url>https://github.com/alexvasilkov/fluffy-image-loader</url>
         <connection>scm:git:git://github.com/alexvasilkov/fluffy-image-loader.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/alexvasilkov/fluffy-image-loader.git</developerConnection>
-      <tag>1.0.5</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
