@@ -5,10 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import com.azcltd.fluffyimageloader.cache.LruCache;
 import com.azcltd.fluffyimageloader.loader.ResourceSpecs;
 import com.azcltd.fluffyimageloader.loader.ResourcesLoader;
 
@@ -26,8 +26,8 @@ public class ImagesLoader extends ResourcesLoader<Bitmap> {
 		return sLoader;
 	}
 
-	public static void create(Context appContext) {
-		sLoader = new ImagesLoader(appContext);
+	public static void create(Context context) {
+		if (sLoader == null) sLoader = new ImagesLoader(context.getApplicationContext());
 	}
 
 	private LruCache<String, Bitmap> mMemoryCache;

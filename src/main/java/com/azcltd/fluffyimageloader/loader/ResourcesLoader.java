@@ -13,14 +13,12 @@ import com.azcltd.fluffyimageloader.cache.DefaultCacheKeyGenerator;
 import com.azcltd.fluffyimageloader.cache.DiskCache;
 import com.azcltd.fluffyimageloader.cache.ICacheKeyGenerator;
 import com.azcltd.fluffyimageloader.loader.ResourcesLoadingManager.LoadingState;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import com.squareup.okhttp.OkHttpClient;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +48,7 @@ public abstract class ResourcesLoader<T> {
     private Thread mManagerThread;
     private final ExecutorService mDownloadThreadPool;
     private final ExecutorService mLocalLoaderThreadPool;
-    private final HttpClient mHttpClient;
+    private final OkHttpClient mHttpClient;
 
     private final Handler mHandler;
 
@@ -64,7 +62,8 @@ public abstract class ResourcesLoader<T> {
         mLoadingManager = new ResourcesLoadingManager<T>();
         mDownloadThreadPool = Executors.newFixedThreadPool(DOWNLOAD_THREAD_POOL_SIZE);
         mLocalLoaderThreadPool = Executors.newFixedThreadPool(LOCAL_LOADER_THREAD_POOL_SIZE);
-        mHttpClient = ConcurrentHttpClient.createHttpClient(DOWNLOAD_THREAD_POOL_SIZE);
+        mHttpClient = new OkHttpClient();
+//        mHttpClient = ConcurrentHttpClient.createHttpClient(DOWNLOAD_THREAD_POOL_SIZE);
         mHandler = new LoadHandler<T>(mLoadingManager);
     }
 
@@ -205,7 +204,7 @@ public abstract class ResourcesLoader<T> {
         mLocalLoaderThreadPool.submit(new LocalLoaderTask(uri, cachedFileUri));
     }
 
-    private void fillHttpHeaders(HttpUriRequest request, String uri) {
+    private void fillHttpHeaders(HttpURLConnection connection, String uri) {
         Set<ResourceSpecs<T>> specsList = mLoadingManager.getSpecsList(uri);
         if (specsList == null) return;
 
@@ -215,7 +214,7 @@ public abstract class ResourcesLoader<T> {
 
         // Adding headers to request
         for (Map.Entry<String, String> pair : lastSpecs.getHeaders().entrySet()) {
-            request.addHeader(pair.getKey(), pair.getValue());
+            connection.addRequestProperty(pair.getKey(), pair.getValue());
         }
     }
 
@@ -310,17 +309,16 @@ public abstract class ResourcesLoader<T> {
 
                     // TODO: add progress
 
+                    InputStream in = null;
                     try {
-                        HttpGet request = new HttpGet(uri);
-                        fillHttpHeaders(request, uri);
-                        HttpResponse resp = mHttpClient.execute(request);
+                        HttpURLConnection connection = mHttpClient.open(new URL(uri));
+                        fillHttpHeaders(connection, uri);
 
-                        int statusCode = resp.getStatusLine().getStatusCode();
+                        int statusCode = connection.getResponseCode();
                         boolean isOk = statusCode / 100 == 2;
-                        HttpEntity entity = resp.getEntity();
 
                         if (isOk) {
-                            InputStream in = entity == null ? null : entity.getContent();
+                            in = connection.getInputStream();
                             res = saveLoadedResource(uri, in, false);
                             if (isVerbose())
                                 Log.d(TAG, "3. Resource downloading is " + (res == null ? "failed" : "succeeded") + ": " + uri);
@@ -328,12 +326,15 @@ public abstract class ResourcesLoader<T> {
                             if (isVerbose())
                                 Log.d(TAG, "3. Resource downloading is failed, http status code " + statusCode + ": " + uri);
                         }
-
-                        if (entity != null) entity.consumeContent();
-
                     } catch (Exception e) {
                         if (isVerbose())
                             Log.d(TAG, "3. Exception while downloading resource: " + e.getMessage() + " (" + uri + ")");
+                    } finally {
+                        if (in != null)
+                            try {
+                                in.close();
+                            } catch (Exception ignored) {
+                            }
                     }
 
                     notifyLoaded(uri, res, false, false);
