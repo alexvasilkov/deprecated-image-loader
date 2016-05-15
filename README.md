@@ -1,3 +1,7 @@
+### Deprecated ###
+
+This library is not supported, use other libraries for image loading.
+
 ### Fluffy ImageLoader ###
 
 Simple task of loading image from Internet into the ImageView is not so simple on Android since you have to worry about multithreading, local caching (on disk and in memory), ListView views recycling and so on.  
